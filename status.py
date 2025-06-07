@@ -10,52 +10,6 @@ import sys
 from pathlib import Path
 
 
-def check_file_exists(filepath, description):
-    """Check if a file exists and report status"""
-    if os.path.exists(filepath):
-        print(f"✅ {description}: {filepath}")
-        return True
-    else:
-        print(f"❌ {description}: {filepath} (missing)")
-        return False
-
-
-def check_directory_structure():
-    """Verify project directory structure"""
-    print("📁 Checking project structure...")
-
-    required_files = [
-        ("README.md", "Main documentation"),
-        ("maubot.yaml", "Plugin configuration"),
-        ("NinetyDegreeRotator/__init__.py", "Main plugin code"),
-        ("maubot_helper.py", "Management helper"),
-        ("deploy.py", "Deployment script"),
-        ("CHANGELOG.md", "Version history"),
-        ("LICENSE", "License file"),
-    ]
-
-    required_dirs = [
-        ("builds/", "Built plugins"),
-        ("archive/", "Historical versions"),
-        ("tests/", "Test files"),
-    ]
-
-    all_good = True
-
-    for filepath, description in required_files:
-        if not check_file_exists(filepath, description):
-            all_good = False
-
-    for dirpath, description in required_dirs:
-        if os.path.exists(dirpath):
-            print(f"✅ {description}: {dirpath}")
-        else:
-            print(f"❌ {description}: {dirpath} (missing)")
-            all_good = False
-
-    return all_good
-
-
 def check_plugin_version():
     """Check current plugin version"""
     print("\n🏷️  Checking plugin version...")
@@ -163,7 +117,6 @@ def main():
     print("=" * 50)
 
     checks = [
-        check_directory_structure,
         check_plugin_version,
         check_builds,
         check_mbc_availability,
@@ -192,10 +145,11 @@ def main():
         print(f"⚠️  {passed}/{total} checks passed. Some issues need attention.")
 
     print("\n💡 Quick commands:")
-    print("   Build:     python deploy.py build")
-    print("   Upload:    python deploy.py upload")
-    print("   Deploy:    python deploy.py deploy -i <instance-id>")
-    print("   Status:    ./maubot_helper.py status")
+    print("   Build:       python deploy.py build")
+    print("   Build+Upload: python deploy.py build-upload")
+    print("   Upload:      python deploy.py upload")
+    print("   Deploy:      python deploy.py deploy -i <instance-id>")
+    print("   Status:      ./maubot_helper.py status")
 
 
 if __name__ == "__main__":

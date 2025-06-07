@@ -15,7 +15,7 @@
 
 ## Development
 - **Dependencies**: UV-managed with `requirements-dev.txt`
-- **Build**: `python deploy.py build` → `.mbp` file
+- **Build+Upload**: `python deploy.py build-upload` → automatic server reload verification
 - **Deploy**: `python deploy.py deploy -i <instance>`
 - **Config**: `autojoin: true` in instance settings
 
@@ -46,15 +46,17 @@ async def on_message(self, evt: MaubotMessageEvent) -> None:
 ### Development Commands
 ```bash
 # Setup
-python deploy.py setup
+./deploy.py setup
 
 # Build & Deploy
-python deploy.py build
-python deploy.py deploy -i <instance>
+./deploy.py build-upload  # Build and upload in one step (recommended)
+./deploy.py build         # Build only
+./deploy.py upload        # Upload only
+./deploy.py deploy -i <instance>
 
 # Management
-python maubot_helper.py list-detailed
-python status.py
+./maubot_helper.py list-detailed
+./status.py
 ```
 
 
@@ -152,3 +154,34 @@ is_encrypted = (
 ---
 
 **For LLM Context**: This project uses modern Python practices with UV for dependency management, follows maubot plugin conventions, handles Matrix encryption robustly, and includes comprehensive tooling for development and deployment.
+
+## Recent Fixes
+
+### Encrypted File URL Issue (FIXED)
+**Problem:** Bot was always returning "Could not find image URL in encrypted file" when processing encrypted images.
+
+**Root Cause:** The code was trying to access the MXC URL from `evt.content.url` for encrypted files, but encrypted files store their URL in the `EncryptedFile` structure at `evt.content.file.url`.
+
+**Solution:** Changed line 55 in `__init__.py` from:
+```python
+mxc_url = evt.content.url
+enc_info: EncryptedFile = evt.content.file
+```
+to:
+```python
+enc_info: EncryptedFile = evt.content.file
+mxc_url = enc_info.url
+```
+
+**Research:** Based on mautrix-python source code analysis, the `EncryptedFile` dataclass (defined in `mautrix/types/event/message.py`) has the following structure:
+```python
+@dataclass
+class EncryptedFile(SerializableAttrs):
+    key: JSONWebKey
+    iv: str
+    hashes: Dict[str, str]
+    url: Optional[ContentURI] = None
+    version: str = attr.ib(default="v2", metadata={"json": "v"})
+```
+
+The URL for encrypted files is stored within the `EncryptedFile` object, not at the top level of the event content.

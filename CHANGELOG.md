@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Encrypted File URL Fix - 2025-06-07
+- **FIXED:** Bot returning "Could not find image URL in encrypted file" for all encrypted images
+- **Issue:** Code was accessing `evt.content.url` instead of `evt.content.file.url` for encrypted files
+- **Solution:** Updated encrypted file URL handling to properly access the URL from the EncryptedFile structure
+- **Research:** Based on mautrix-python source code analysis of EncryptedFile dataclass structure
+- Plugin deployed and ready for testing with encrypted images
+
+### Build System Improvements - 2025-06-07
+- Added combined `build-upload` command for one-step deployment
+- Implemented server reload verification after plugin upload
+- Enhanced deployment workflow with automatic plugin organizing
+- Updated documentation to reflect new build commands
+
 ### Repository Cleanup - 2025-06-07
 - Removed shell-specific scripts (fish helpers) for shell-agnostic approach
 - Consolidated documentation into main README

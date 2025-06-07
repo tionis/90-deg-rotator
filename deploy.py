@@ -7,6 +7,7 @@ Uses UV for dependency management when available.
 """
 
 import argparse
+import json
 import os
 import subprocess
 import sys
@@ -111,6 +112,64 @@ def get_current_plugin_version():
     return None
 
 
+def build_and_upload():
+    """Build and upload the plugin in one step, with reload verification"""
+    print("🚀 Building and uploading plugin...")
+    
+    # Step 1: Build
+    if not build_plugin():
+        return False
+    
+    # Step 2: Upload
+    if not upload_plugin():
+        return False
+    
+    # Step 3: Verify server reload
+    if not verify_plugin_reload():
+        print("⚠️  Warning: Could not verify plugin reload, but upload succeeded")
+    
+    # Step 4: Move to builds
+    return move_to_builds()
+
+
+def verify_plugin_reload():
+    """Check if the maubot server successfully reloaded the plugin"""
+    plugin_id = get_current_plugin_version()
+    if not plugin_id:
+        return False
+    
+    print("🔍 Verifying plugin reload on server...")
+    
+    try:
+        # Use maubot_helper to check if plugin is loaded
+        result = subprocess.run(
+            ["./maubot_helper.py", "list", "--json"], 
+            capture_output=True, 
+            text=True, 
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            import json
+            data = json.loads(result.stdout)
+            
+            # Check if our plugin ID exists in the plugins list
+            if 'plugins' in data:
+                for plugin in data['plugins']:
+                    if plugin.get('id') == plugin_id:
+                        print(f"   ✅ Plugin {plugin_id} successfully loaded on server")
+                        return True
+            
+            print(f"   ❌ Plugin {plugin_id} not found in server plugin list")
+            return False
+            
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, FileNotFoundError) as e:
+        print(f"   ⚠️  Could not verify reload: {e}")
+        return False
+    
+    return False
+
+
 def build_plugin():
     """Build the maubot plugin"""
     return run_command("mbc build", "Building maubot plugin")
@@ -165,9 +224,7 @@ def deploy_full(instance_id):
     print("=" * 50)
 
     steps = [
-        ("build", lambda: build_plugin()),
-        ("upload", lambda: upload_plugin()),
-        ("organize", lambda: move_to_builds()),
+        ("build-upload", lambda: build_and_upload()),
     ]
 
     if instance_id:
@@ -187,7 +244,9 @@ def deploy_full(instance_id):
 def main():
     parser = argparse.ArgumentParser(description="Deploy NinetyDegreeRotator maubot plugin")
     parser.add_argument(
-        "action", choices=["setup", "build", "upload", "deploy"], help="Action to perform"
+        "action", 
+        choices=["setup", "build", "upload", "build-upload", "deploy"], 
+        help="Action to perform"
     )
     parser.add_argument("-i", "--instance", help="Instance ID to update (for deploy action)")
 
@@ -206,6 +265,8 @@ def main():
         success = build_plugin() and move_to_builds()
     elif args.action == "upload":
         success = upload_plugin()
+    elif args.action == "build-upload":
+        success = build_and_upload()
     elif args.action == "deploy":
         if not args.instance:
             print("❌ Instance ID required for deploy action. Use -i <instance_id>")

@@ -3,30 +3,18 @@ from typing import Type
 
 from maubot import MessageEvent, Plugin
 from maubot.handlers import event
-from mautrix.types import EncryptedFile, EventType, ImageInfo, MessageType, RoomID
+from mautrix.types import EncryptedFile, EventType, ImageInfo, MessageType
 from mautrix.util.config import BaseProxyConfig, ConfigUpdateHelper
+from mautrix.crypto.attachments import decrypt_attachment
 from PIL import Image
 
-# Try to import cryptography and decryption functions
+# Handle different versions of mautrix crypto
 try:
-    from mautrix.crypto.attachments import EncryptionError, decrypt_attachment
-
-    CRYPTO_AVAILABLE = True
-    DECRYPT_METHOD = "mautrix"
+    from mautrix.crypto.attachments import EncryptionError
 except ImportError:
-    try:
-        # Fallback to manual decryption if mautrix crypto isn't available
-        import base64
-        import hashlib
-
-        from cryptography.hazmat.backends import default_backend
-        from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-
-        CRYPTO_AVAILABLE = True
-        DECRYPT_METHOD = "manual"
-    except ImportError:
-        CRYPTO_AVAILABLE = False
-        DECRYPT_METHOD = "none"
+    # Fallback for older versions that don't export EncryptionError
+    class EncryptionError(Exception):
+        pass
 
 
 class Config(BaseProxyConfig):
@@ -35,12 +23,11 @@ class Config(BaseProxyConfig):
 
 
 class NinetyDegreeRotator(Plugin):
-    PLUGIN_VERSION = "v0.2.0"  # Updated version identifier
+    PLUGIN_VERSION = "v0.2.0"
 
     async def start(self) -> None:
         await super().start()
         self.log.info(f"NinetyDegreeRotator plugin {self.PLUGIN_VERSION} started.")
-        self.log.info(f"Cryptography available: {CRYPTO_AVAILABLE}, method: {DECRYPT_METHOD}")
 
     @event.on(EventType.ROOM_MEMBER)
     async def on_invite(self, evt: MessageEvent) -> None:
@@ -50,121 +37,56 @@ class NinetyDegreeRotator(Plugin):
 
     @event.on(EventType.ROOM_MESSAGE)
     async def on_message(self, evt: MessageEvent) -> None:
-        # Log basic message details
-        self.log.info(
-            f"on_message ({self.PLUGIN_VERSION}) received event: {evt.event_id}, type: {evt.type}, msgtype: {evt.content.msgtype}"
-        )
-
         # Only process image messages
         if evt.content.msgtype != MessageType.IMAGE:
             return
+        
+        # Logging whole event for debugging for now TODO remove this
+        print(evt)
 
         self.log.info(f"Processing image event: {evt.event_id}")
 
         try:
-            # Handle both encrypted and unencrypted images
             image_bytes = None
             filename = evt.content.body or "image"
 
+            # Check if it's an encrypted file
             if hasattr(evt.content, "file") and evt.content.file:
-                # This is an encrypted file
+                # Encrypted file
                 self.log.info("Detected encrypted file")
-                self.log.info(
-                    f"Cryptography available: {CRYPTO_AVAILABLE}, method: {DECRYPT_METHOD}"
-                )
-                mxc_url = evt.content.file.url
+                enc_info: EncryptedFile = evt.content.file
+                mxc_url = enc_info.url
 
                 if not mxc_url:
                     await evt.respond("Could not find image URL in encrypted file.")
                     return
 
-                if not CRYPTO_AVAILABLE:
-                    self.log.info("Sending cryptography unavailable message")
-                    await evt.respond(
-                        "Sorry, cryptography module is not available on this server. Cannot decrypt encrypted images."
-                    )
-                    return
-
-                # Download encrypted data
-                encrypted_bytes = await evt.client.download_media(mxc_url)
-
-                # Try different decryption methods
                 try:
-                    if DECRYPT_METHOD == "mautrix":
-                        # Use mautrix built-in decryption
-                        image_bytes = decrypt_attachment(encrypted_bytes, evt.content.file)
-                        self.log.info(
-                            "Successfully decrypted image using mautrix.crypto.attachments.decrypt_attachment"
-                        )
-                    elif DECRYPT_METHOD == "manual":
-                        # Use manual decryption
-                        file_info = evt.content.file
-                        if hasattr(file_info, "key") and hasattr(file_info, "iv"):
-                            # Extract decryption parameters from JWK format
-                            key_jwk = file_info.key
-                            if hasattr(key_jwk, "k"):
-                                # Add padding if needed for base64 decoding
-                                key_b64 = key_jwk.k
-                                key_b64 += "=" * (4 - len(key_b64) % 4) if len(key_b64) % 4 else ""
-                                key_data = base64.b64decode(key_b64)
-                            else:
-                                raise ValueError("Missing key data in JWK")
+                    # Download the raw encrypted bytes
+                    download_url = self.client.api.get_download_url(mxc_url)
+                    async with self.client.http.get(download_url) as resp:
+                        encrypted_bytes = await resp.read()
 
-                            # Decode IV
-                            iv_b64 = file_info.iv
-                            iv_b64 += "=" * (4 - len(iv_b64) % 4) if len(iv_b64) % 4 else ""
-                            iv_data = base64.b64decode(iv_b64)
-
-                            self.log.info(f"Key length: {len(key_data)}, IV length: {len(iv_data)}")
-
-                            # Decrypt using AES-CTR
-                            cipher = Cipher(
-                                algorithms.AES(key_data),
-                                modes.CTR(iv_data),
-                                backend=default_backend(),
-                            )
-                            decryptor = cipher.decryptor()
-                            image_bytes = decryptor.update(encrypted_bytes) + decryptor.finalize()
-
-                            # Verify hash if available
-                            if hasattr(file_info, "hashes") and hasattr(file_info.hashes, "sha256"):
-                                expected_hash = base64.b64decode(
-                                    file_info.hashes.sha256
-                                    + "=" * (4 - len(file_info.hashes.sha256) % 4)
-                                    if len(file_info.hashes.sha256) % 4
-                                    else file_info.hashes.sha256
-                                )
-                                actual_hash = hashlib.sha256(image_bytes).digest()
-                                if expected_hash != actual_hash:
-                                    self.log.warning("Hash verification failed for decrypted file")
-                                else:
-                                    self.log.info("Hash verification successful")
-
-                            self.log.info("Successfully decrypted image using manual decryption")
-                        else:
-                            raise ValueError("Missing encryption parameters for encrypted file")
-                    else:
-                        raise ValueError("No decryption method available")
-
-                except (
-                    EncryptionError if DECRYPT_METHOD == "mautrix" else Exception
-                ) as decrypt_error:
-                    self.log.error(f"Failed to decrypt image: {decrypt_error}")
-                    await evt.respond(
-                        f"Could not decrypt the encrypted image: {str(decrypt_error)}"
+                    # Decrypt using the metadata from the event
+                    image_bytes = decrypt_attachment(
+                        ciphertext=encrypted_bytes,
+                        key=enc_info.key,
+                        iv=enc_info.iv,
+                        hash=enc_info.hashes["sha256"]
                     )
+                    self.log.info(f"Successfully decrypted {len(image_bytes)} bytes")
+
+                except EncryptionError as e:
+                    self.log.error(f"Decryption failed for {filename}: {e}")
+                    await evt.respond(f"Could not decrypt the encrypted image: {str(e)}")
                     return
-                except Exception as decrypt_error:
-                    self.log.error(
-                        f"Unexpected error during decryption: {decrypt_error}", exc_info=True
-                    )
-                    await evt.respond(
-                        f"Unexpected error while decrypting image: {str(decrypt_error)}"
-                    )
+                except Exception as e:
+                    self.log.error(f"Unexpected error during decryption: {e}")
+                    await evt.respond(f"Unexpected error while decrypting image: {str(e)}")
                     return
 
             elif evt.content.url:
-                # This is an unencrypted file
+                # Unencrypted file
                 self.log.info("Detected unencrypted file")
                 mxc_url = evt.content.url
                 image_bytes = await evt.client.download_media(mxc_url)

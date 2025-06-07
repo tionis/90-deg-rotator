@@ -21,11 +21,13 @@ A maubot plugin that automatically rotates images 90 degrees counter-clockwise w
 
 ```bash
 # 1. Build and deploy in one command
-python deploy.py deploy -i your-instance-id
+./deploy.py deploy -i your-instance-id
 
 # 2. Or step by step:
-python deploy.py build    # Build plugin
-python deploy.py upload   # Upload to server
+./deploy.py build-upload  # Build and upload in one step (recommended)
+# OR separate steps:
+./deploy.py build         # Build plugin only
+./deploy.py upload        # Upload to server only
 ./maubot_helper.py update your-instance-id dev.tionis.maubot.NinetyDegreeRotator
 ```
 
@@ -82,7 +84,7 @@ The `maubot_helper.py` script now uses uv for dependency management and can be r
 ./maubot_helper.py list --json
 
 # Check deployment status
-python status.py
+./status.py
 ```
 
 **Note:** The script can also be run with `python maubot_helper.py` if uv is not available.
@@ -113,7 +115,7 @@ mbc auth
 cat maubot.yaml
 
 # Check for Python syntax errors
-python -m py_compile NinetyDegreeRotator/__init__.py
+python3 -m py_compile NinetyDegreeRotator/__init__.py
 ```
 
 ## Development
@@ -181,22 +183,23 @@ except Exception as e:
 
 ```bash
 # Format code
-python -m black . && python -m isort .
+python3 -m black . && python3 -m isort .
 
-# Build plugin
-mbc build
+# Build and upload in one step (recommended)
+./deploy.py build-upload
 
-# Upload plugin  
-mbc upload builds/dev.tionis.maubot.NinetyDegreeRotator-v0.2.0.mbp
+# OR separate steps:
+./deploy.py build     # Build plugin only
+./deploy.py upload    # Upload plugin only
 
 # Update instance
 ./maubot_helper.py update <instance-id> dev.tionis.maubot.NinetyDegreeRotator
 
-# Deploy with helper script
-python deploy.py deploy -i <instance-id>
+# Full deploy with helper script
+./deploy.py deploy -i <instance-id>
 
 # Check deployment status
-python status.py
+./status.py
 ```
 
 ### Manual Testing Checklist
