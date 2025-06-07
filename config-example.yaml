@@ -1,0 +1,12 @@
+# Example configuration for 90 Degree Rotator Plugin
+# This file shows the available configuration options
+
+# Whether to automatically join rooms when the bot is invited
+# Default: true
+autojoin: true
+
+# Note: Additional configuration options may be added in future versions
+# such as:
+# - rotation_angle: 90  # degrees to rotate (90, 180, 270)
+# - max_file_size: 10485760  # maximum file size to process (10MB)
+# - allowed_formats: ["jpg", "jpeg", "png", "gif"]  # supported formats
