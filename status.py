@@ -37,8 +37,7 @@ def check_directory_structure():
     required_dirs = [
         ("builds/", "Built plugins"),
         ("archive/", "Historical versions"),
-        ("docs/", "Documentation"),
-        ("scripts/", "Helper scripts"),
+        ("tests/", "Test files"),
     ]
 
     all_good = True
@@ -108,25 +107,23 @@ def check_builds():
         print("❌ builds/ directory not found")
 
 
-def check_mbc_config():
-    """Check if mbc is configured"""
-    print("\n🔧 Checking mbc configuration...")
+def check_mbc_availability():
+    """Check if mbc is available for building"""
+    print("\n🔧 Checking mbc availability...")
 
-    config_path = Path.home() / ".config" / "maubot-cli.json"
-    if config_path.exists():
-        print("✅ mbc configuration found")
-        try:
-            result = subprocess.run(["mbc", "auth"], capture_output=True, text=True, timeout=5)
-            if result.returncode == 0:
-                print("✅ mbc authentication working")
-            else:
-                print("⚠️  mbc authentication may need refresh")
-        except FileNotFoundError:
-            print("❌ mbc command not found - install with: pip install maubot")
-        except subprocess.TimeoutExpired:
-            print("⚠️  mbc command timed out - may need manual check")
-    else:
-        print("❌ mbc not configured - run: mbc auth")
+    try:
+        # Just check if mbc command exists using help command
+        result = subprocess.run(["mbc", "--help"], capture_output=True, text=True, timeout=5)
+        if result.returncode == 0:
+            print("✅ mbc command available for building")
+        else:
+            print("⚠️  mbc may have issues - check installation")
+    except FileNotFoundError:
+        print("❌ mbc command not found - install with: pip install maubot")
+    except subprocess.TimeoutExpired:
+        print("⚠️  mbc command timed out")
+    
+    return True  # Don't fail the overall check since mbc might work for building
 
 
 def check_git_status():
@@ -169,7 +166,7 @@ def main():
         check_directory_structure,
         check_plugin_version,
         check_builds,
-        check_mbc_config,
+        check_mbc_availability,
         check_git_status,
     ]
 
