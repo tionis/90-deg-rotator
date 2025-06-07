@@ -1,14 +1,15 @@
 # NinetyDegreeRotator Maubot Plugin
 
-A maubot plugin that automatically rotates images 90 degrees counter-clockwise when sent to Matrix rooms. Supports both encrypted and unencrypted images with auto-join functionality.
+A maubot plugin that rotates images 90 degrees counter-clockwise when commanded in Matrix rooms. Responds to `/rotate` or `/r` commands sent as replies to image messages. Supports both encrypted and unencrypted images with auto-join functionality.
+This is mainly meant as a template and experiment.  
 
 ## Features
 
-- 🔄 Rotates all sent images 90 degrees counter-clockwise
+- 🔄 Rotates images 90 degrees counter-clockwise when commanded
+- 💬 Command-based: responds to `/rotate` or `/r` replies to images
 - 🔐 Handles encrypted and unencrypted Matrix images
 - 🤖 Auto-joins rooms when invited (configurable)
 - 📝 Comprehensive error handling and logging
-- 🔧 Multiple encryption fallback methods
 
 ## Quick Start
 
@@ -34,9 +35,10 @@ A maubot plugin that automatically rotates images 90 degrees counter-clockwise w
 ### ✅ Verify Installation
 
 1. Check instance is running: `./maubot_helper.py status`
-2. Send test image to a room with the bot
-3. Verify rotated image is returned
-4. Check logs for any errors
+2. Send an image to a room with the bot
+3. Reply to that image with `/rotate` or `/r`
+4. Verify rotated image is returned
+5. Check logs for any errors
 
 ## Configuration
 
