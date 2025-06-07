@@ -37,12 +37,13 @@ class NinetyDegreeRotator(Plugin):
 
     @event.on(EventType.ROOM_MESSAGE)
     async def on_message(self, evt: MessageEvent) -> None:
+        # Ignore messages from the bot itself
+        if evt.sender == self.client.mxid:
+            return
+            
         # Only process image messages
         if evt.content.msgtype != MessageType.IMAGE:
             return
-        
-        # Logging whole event for debugging for now TODO remove this
-        print(evt)
 
         self.log.info(f"Processing image event: {evt.event_id}")
 
@@ -65,7 +66,6 @@ class NinetyDegreeRotator(Plugin):
                     # Use the client's built-in download method for encrypted files
                     self.log.info(f"Downloading encrypted media from: {mxc_url}")
                     encrypted_bytes = await evt.client.download_media(mxc_url)
-                    self.log.info(f"Downloaded {len(encrypted_bytes)} bytes of encrypted data")
                     
                     self.log.info(f"Downloaded {len(encrypted_bytes)} bytes of encrypted data")
                     self.log.info(f"Key: {enc_info.key.key}")
@@ -119,6 +119,10 @@ class NinetyDegreeRotator(Plugin):
             img_format = img.format or "PNG"
             rotated_img.save(output_buffer, format=img_format)
             output_buffer.seek(0)
+            
+            # Get the size before uploading (which may close the buffer)
+            rotated_image_size = len(output_buffer.getvalue())
+            output_buffer.seek(0)
 
             # Upload the rotated image
             rotated_image_mxc = await evt.client.upload_media(
@@ -130,15 +134,15 @@ class NinetyDegreeRotator(Plugin):
             # Send the rotated image
             await evt.respond(
                 content={
-                    "msgtype": MessageType.IMAGE,
+                    "msgtype": MessageType.IMAGE.value,
                     "body": f"rotated_{filename}",
                     "url": rotated_image_mxc,
-                    "info": ImageInfo(
-                        mimetype=f"image/{img_format.lower()}",
-                        width=rotated_img.width,
-                        height=rotated_img.height,
-                        size=len(output_buffer.getvalue()),
-                    ),
+                    "info": {
+                        "mimetype": f"image/{img_format.lower()}",
+                        "w": rotated_img.width,
+                        "h": rotated_img.height,
+                        "size": rotated_image_size,
+                    },
                 }
             )
 
