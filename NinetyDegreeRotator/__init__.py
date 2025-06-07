@@ -64,7 +64,7 @@ class NinetyDegreeRotator(Plugin):
                 try:
                     # Download the raw encrypted bytes
                     download_url = self.client.api.get_download_url(mxc_url)
-                    async with self.client.http.get(download_url) as resp:
+                    async with self.http.get(download_url) as resp:
                         encrypted_bytes = await resp.read()
 
                     # Decrypt using the metadata from the event
