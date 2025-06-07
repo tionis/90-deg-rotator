@@ -177,7 +177,7 @@
 ## Development Tools Evolution
 
 ### Management Scripts
-- **maubot_helper.py**: Added in V8 development
+- **maubot-api.py**: Added in V8 development
   - Functions: list, delete, disable, update instances
   - API integration for maubot management
   - Streamlined development workflow
@@ -191,20 +191,10 @@
 
 ## Future Roadmap
 
-### Short Term (Next Version)
+### Possible Improvements
 - [ ] Unit tests implementation
 - [ ] Configuration validation
 - [ ] Better error recovery
-
-### Medium Term
-- [ ] Multiple rotation angle support
-- [ ] Image transformation options
-- [ ] Performance optimizations
-
-### Long Term
-- [ ] Docker deployment support
-- [ ] Web configuration interface
-- [ ] Integration with other Matrix bots
 
 ---
 

@@ -159,6 +159,7 @@ dependencies = [
     { name = "propcache", version = "0.3.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
     { name = "yarl", version = "1.20.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/fc/76/cc6f37a12372dd72891dad5ffc3fc71375c2f92bb4a59f7ac11119332559/aiohttp-3.12.10.tar.gz", hash = "sha256:a9871b1b1381f8d8241f3ff3de5fcb6e2fdcfe8af43c35bb0496b8be550c5fb9", size = 7810445 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/22/af/869010ad3b52213aece9231fda1b9d4cb2fc820256b89906807ba0c78018/aiohttp-3.12.10-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:8e702963f298fa471c046b38ea50992328afa1120f1c714be38e5a0e0eaa50b7", size = 700614 },
     { url = "https://files.pythonhosted.org/packages/ae/3c/d963e0077dad34fa769acab5d5f33de05e3caef12b3d3b0ca847461c0e24/aiohttp-3.12.10-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:6c1fcfcc77fc9a4a9abcb4f01fe658d02e15b0446cef81010ba6945cbcb743f4", size = 476979 },
@@ -1683,6 +1684,9 @@ version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "cryptography" },
+    { name = "maubot", version = "0.4.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "maubot", version = "0.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "maubot", version = "0.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "pillow", version = "10.4.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "pillow", version = "11.2.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
 ]
@@ -1695,9 +1699,6 @@ dev = [
     { name = "black", version = "25.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
     { name = "isort", version = "5.13.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "isort", version = "6.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
-    { name = "maubot", version = "0.4.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
-    { name = "maubot", version = "0.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
-    { name = "maubot", version = "0.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "mypy", version = "1.14.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "mypy", version = "1.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
     { name = "pytest", version = "8.3.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
@@ -1714,7 +1715,7 @@ requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=22.0.0" },
     { name = "cryptography", specifier = ">=3.0.0" },
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.0.0" },
-    { name = "maubot", marker = "extra == 'dev'", specifier = ">=0.4.0" },
+    { name = "maubot", specifier = ">=0.4.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0.0" },
     { name = "pillow", specifier = ">=9.0.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },

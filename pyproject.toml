@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.8"
 authors = [
-    { name = "tionis", email = "tionis@example.com" },
+    { name = "tionis", email = "git@tionis.dev" },
 ]
 keywords = ["maubot", "matrix", "bot", "image", "rotation"]
 classifiers = [
@@ -30,11 +30,11 @@ classifiers = [
 dependencies = [
     "Pillow>=9.0.0",
     "cryptography>=3.0.0",
+    "maubot>=0.4.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "maubot>=0.4.0",
     "aiohttp>=3.8.0",
     "black>=22.0.0",
     "isort>=5.0.0",

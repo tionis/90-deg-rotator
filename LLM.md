@@ -10,20 +10,20 @@
 ## Key Files
 - `NinetyDegreeRotator/__init__.py` - Main plugin code
 - `maubot.yaml` - Plugin metadata
-- `deploy.py` - Build/deploy automation
-- `maubot_helper.py` - Instance management
+- `maubot-dev.py` - Build/deploy automation
+- `maubot-api.py` - Instance management
 
 ## Development Commands
 ```bash
 # Build and upload in one step
-./deploy.py build-upload
+./maubot-dev.py build-upload
 
 # Full deployment with instance update
-./deploy.py deploy -i <instance-id>
+./maubot-dev.py deploy -i <instance-id>
 
 # Instance management
-./maubot_helper.py status
-./maubot_helper.py update <instance-id> dev.tionis.maubot.NinetyDegreeRotator
+./maubot-api.py status
+./maubot-api.py update <instance-id> dev.tionis.maubot.NinetyDegreeRotator
 ```
 
 ## Architecture
