@@ -3,7 +3,7 @@ from typing import Type
 
 from maubot import MessageEvent, Plugin
 from maubot.handlers import event
-from mautrix.types import EncryptedFile, EventType, ImageInfo, MessageType
+from mautrix.types import EncryptedFile, EventType, ImageInfo, MessageType, RelatesTo
 from mautrix.util.config import BaseProxyConfig, ConfigUpdateHelper
 from mautrix.crypto.attachments import decrypt_attachment
 from PIL import Image
@@ -41,21 +41,47 @@ class NinetyDegreeRotator(Plugin):
         if evt.sender == self.client.mxid:
             return
             
-        # Only process image messages
-        if evt.content.msgtype != MessageType.IMAGE:
+        # Only process text messages that contain rotate commands
+        if evt.content.msgtype != MessageType.TEXT:
+            return
+            
+        # Check if the message is a rotate command
+        body = (evt.content.body or "").strip().lower()
+        if not (body.startswith('/rotate') or body.startswith('/r')):
             return
 
-        self.log.info(f"Processing image event: {evt.event_id}")
+        self.log.info(f"Processing rotate command: {evt.event_id}")
+        
+        # Check if this is a reply to another message
+        if not hasattr(evt.content, 'relates_to') or not evt.content.relates_to or not hasattr(evt.content.relates_to, 'in_reply_to'):
+            await evt.respond("Please reply to an image message with /rotate or /r to rotate it.")
+            return
+            
+        # Get the message being replied to
+        reply_to_id = evt.content.relates_to.in_reply_to.event_id
+        try:
+            replied_msg = await evt.client.get_event(evt.room_id, reply_to_id)
+        except Exception as e:
+            self.log.error(f"Failed to get replied message: {e}")
+            await evt.respond("Could not find the message you're replying to.")
+            return
+            
+        # Check if the replied message is an image
+        if replied_msg.content.msgtype != MessageType.IMAGE:
+            await evt.respond("Please reply to an image message to rotate it.")
+            return
+
+        self.log.info(f"Processing image from replied message: {reply_to_id}")
 
         try:
             image_bytes = None
-            filename = evt.content.body or "image"
+            filename = replied_msg.content.body or "image"
 
             # Check if it's an encrypted file
-            if hasattr(evt.content, "file") and evt.content.file:
+            if hasattr(replied_msg.content, "file") and replied_msg.content.file:
                 # Encrypted file
                 self.log.info("Detected encrypted file")
-                enc_info: EncryptedFile = evt.content.file
+                enc_info: EncryptedFile = replied_msg.content.file
                 mxc_url = enc_info.url
 
                 if not mxc_url:
@@ -95,10 +121,10 @@ class NinetyDegreeRotator(Plugin):
                     await evt.respond(f"Unexpected error while decrypting image: {str(e)}")
                     return
 
-            elif evt.content.url:
+            elif replied_msg.content.url:
                 # Unencrypted file
                 self.log.info("Detected unencrypted file")
-                mxc_url = evt.content.url
+                mxc_url = replied_msg.content.url
                 image_bytes = await evt.client.download_media(mxc_url)
 
             else:
