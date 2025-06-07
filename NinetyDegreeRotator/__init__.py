@@ -68,139 +68,17 @@ class NinetyDegreeRotator(Plugin):
                     self.log.info(f"Downloaded {len(encrypted_bytes)} bytes of encrypted data")
                     
                     self.log.info(f"Downloaded {len(encrypted_bytes)} bytes of encrypted data")
-                    self.log.info(f"Expected hash (base64): {enc_info.hashes['sha256']}")
-                    self.log.info(f"Key length: {len(enc_info.key.key)} chars")
+                    self.log.info(f"Key: {enc_info.key.key}")
+                    self.log.info(f"Hash: {enc_info.hashes['sha256']}")
                     self.log.info(f"IV: {enc_info.iv}")
-                    
-                    # Calculate actual hash of downloaded data for comparison
-                    import hashlib
-                    import base64
-                    actual_hash = hashlib.sha256(encrypted_bytes).digest()
-                    actual_hash_b64 = base64.b64encode(actual_hash).decode()
-                    
-                    self.log.info("Starting hash processing...")
-                    
-                    # Check if the hash from Matrix is already bytes or base64 string
-                    hash_from_matrix = enc_info.hashes["sha256"]
-                    self.log.info(f"Hash from matrix: {hash_from_matrix}")
-                    self.log.info(f"Hash from matrix type: {type(hash_from_matrix)}")
-                    
-                    try:
-                        if isinstance(hash_from_matrix, str):
-                            # It's a base64 string, decode it
-                            self.log.info("Attempting to decode hash as base64 string...")
-                            hash_str = hash_from_matrix
-                            # Add padding if needed
-                            missing_padding = len(hash_str) % 4
-                            if missing_padding:
-                                hash_str += '=' * (4 - missing_padding)
-                            self.log.info(f"Hash with padding: '{hash_str}'")
-                            expected_hash_bytes = base64.b64decode(hash_str)
-                            expected_hash_b64 = hash_from_matrix
-                        else:
-                            # It's already bytes
-                            self.log.info("Hash is already bytes...")
-                            expected_hash_bytes = hash_from_matrix
-                            expected_hash_b64 = base64.b64encode(hash_from_matrix).decode()
-                        self.log.info("Hash processing successful!")
-                    except Exception as hash_error:
-                        self.log.error(f"Hash decoding failed: {hash_error}")
-                        # Try URL-safe base64 for hash too
-                        try:
-                            expected_hash_bytes = base64.urlsafe_b64decode(hash_from_matrix + '===')
-                            expected_hash_b64 = hash_from_matrix
-                            self.log.info("Hash decoded with URL-safe base64!")
-                        except Exception as hash_error2:
-                            self.log.error(f"URL-safe hash decoding also failed: {hash_error2}")
-                            raise hash_error
-                    
-                    self.log.info(f"Actual SHA-256 (b64): {actual_hash_b64}")
-                    self.log.info(f"Expected SHA-256 (b64): {expected_hash_b64}")
-                    self.log.info(f"Hash match: {actual_hash == expected_hash_bytes}")
-                    self.log.info(f"Hash type: {type(hash_from_matrix)}")
-                    self.log.info(f"IV type: {type(enc_info.iv)}")
-                    self.log.info(f"Key type: {type(enc_info.key.key)}")
-                    
-                    # Log first few bytes of encrypted data for debugging
-                    self.log.info(f"First 32 bytes: {encrypted_bytes[:32].hex()}")
-                    
-                    self.log.info("Starting decryption parameter processing...")
-                    
-                    # Handle IV decoding more carefully
-                    self.log.info(f"Raw IV value: '{enc_info.iv}'")
-                    self.log.info(f"Raw IV repr: {repr(enc_info.iv)}")
-                    try:
-                        if isinstance(enc_info.iv, str):
-                            # Try different padding approaches
-                            iv_str = enc_info.iv
-                            # Add padding if needed
-                            missing_padding = len(iv_str) % 4
-                            if missing_padding:
-                                iv_str += '=' * (4 - missing_padding)
-                            self.log.info(f"IV with padding: '{iv_str}'")
-                            iv_bytes = base64.b64decode(iv_str)
-                        else:
-                            iv_bytes = enc_info.iv
-                        self.log.info(f"IV bytes length: {len(iv_bytes)}")
-                        self.log.info(f"IV hex: {iv_bytes.hex()}")
-                    except Exception as iv_error:
-                        self.log.error(f"IV decoding error: {iv_error}")
-                        # Try alternative approaches
-                        try:
-                            # Try URL-safe base64
-                            iv_bytes = base64.urlsafe_b64decode(enc_info.iv + '===')
-                            self.log.info(f"IV decoded with urlsafe: {iv_bytes.hex()}")
-                        except Exception as iv_error2:
-                            self.log.error(f"URL-safe IV decoding error: {iv_error2}")
-                            # Last resort: treat as already bytes or encode as UTF-8
-                            if isinstance(enc_info.iv, bytes):
-                                iv_bytes = enc_info.iv
-                            else:
-                                iv_bytes = enc_info.iv.encode('utf-8')[:16]  # AES block size
-                            self.log.info(f"Fallback IV bytes: {iv_bytes.hex()}")
-                    
-                    # Handle key decoding with similar approach
-                    self.log.info(f"Raw key value: '{enc_info.key.key}'")
-                    try:
-                        if isinstance(enc_info.key.key, str):
-                            key_str = enc_info.key.key
-                            # Add padding if needed
-                            missing_padding = len(key_str) % 4
-                            if missing_padding:
-                                key_str += '=' * (4 - missing_padding)
-                            key_bytes = base64.b64decode(key_str)
-                        else:
-                            key_bytes = enc_info.key.key
-                        self.log.info(f"Key bytes length: {len(key_bytes)}")
-                    except Exception as key_error:
-                        self.log.error(f"Key decoding error: {key_error}")
-                        # Try URL-safe base64 for key too
-                        try:
-                            if isinstance(enc_info.key.key, str):
-                                key_bytes = base64.urlsafe_b64decode(enc_info.key.key + '===')
-                            else:
-                                key_bytes = enc_info.key.key
-                        except Exception as key_urlsafe_error:
-                            self.log.error(f"URL-safe key decoding also failed: {key_urlsafe_error}")
-                            # Final fallback - if it's a string, encode it, otherwise use as-is
-                            if isinstance(enc_info.key.key, str):
-                                key_bytes = enc_info.key.key.encode('utf-8')
-                            else:
-                                key_bytes = enc_info.key.key
-                    
-                    self.log.info("About to call decrypt_attachment with:")
-                    self.log.info(f"  - ciphertext length: {len(encrypted_bytes)}")
-                    self.log.info(f"  - key length: {len(key_bytes)}")
-                    self.log.info(f"  - hash length: {len(expected_hash_bytes)}")
-                    self.log.info(f"  - iv length: {len(iv_bytes)}")
                     
                     # Decrypt using the metadata from the event
                     try:
                         image_bytes = decrypt_attachment(
                             ciphertext=encrypted_bytes,
-                            key=key_bytes,
-                            hash=expected_hash_bytes,
-                            iv=iv_bytes
+                            key=enc_info.key.key,
+                            hash=enc_info.hashes["sha256"],
+                            iv=enc_info.iv
                         )
                         self.log.info(f"Successfully decrypted {len(image_bytes)} bytes")
                     except Exception as decrypt_error:

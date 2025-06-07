@@ -42,8 +42,6 @@ config.yaml
 tmp/
 temp/
 
-# Archive (keep structure but ignore contents)
-archive/*.mbp
-
 # Built plugin files in root (should be in builds/)
 dev.tionis.maubot.90degrotator*.mbp
+builds/
