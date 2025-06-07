@@ -1,4 +1,9 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --quiet --script
+# /// script
+# dependencies = [
+#   "requests>=2.25.0",
+# ]
+# ///
 """
 Maubot management helper script with improved CLI interface
 """

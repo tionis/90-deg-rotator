@@ -195,7 +195,7 @@ def main():
     print("   Build:     python deploy.py build")
     print("   Upload:    python deploy.py upload")
     print("   Deploy:    python deploy.py deploy -i <instance-id>")
-    print("   Status:    python maubot_helper.py list-detailed")
+    print("   Status:    ./maubot_helper.py status")
 
 
 if __name__ == "__main__":

@@ -140,7 +140,7 @@ def update_instance(instance_id):
         return False
 
     return run_command(
-        f"python3 maubot_helper.py update-plugin {instance_id} {plugin_version}",
+        f"./maubot_helper.py update {instance_id} {plugin_version}",
         f"Updating instance {instance_id} to use {plugin_version}",
     )
 
