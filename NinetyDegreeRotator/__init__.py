@@ -3,7 +3,7 @@ from typing import Type
 
 from maubot import MessageEvent, Plugin
 from maubot.handlers import event
-from mautrix.types import EncryptedFile, EventType, ImageInfo, MessageType, RelatesTo
+from mautrix.types import EncryptedFile, EventType, MessageType, RelatesTo
 from mautrix.util.config import BaseProxyConfig, ConfigUpdateHelper
 from mautrix.crypto.attachments import decrypt_attachment
 from PIL import Image
@@ -23,6 +23,10 @@ class Config(BaseProxyConfig):
 
 
 class NinetyDegreeRotator(Plugin):
+    """
+    A Matrix bot that rotates images by 90 degrees when commanded.
+    Usage: Reply to an image with /rotate or /r to rotate it.
+    """
     PLUGIN_VERSION = "v0.2.0"
 
     async def start(self) -> None:
@@ -37,7 +41,7 @@ class NinetyDegreeRotator(Plugin):
 
     @event.on(EventType.ROOM_MESSAGE)
     async def on_message(self, evt: MessageEvent) -> None:
-        # Ignore messages from the bot itself
+        # Ignore messages from the bot itself to prevent loops
         if evt.sender == self.client.mxid:
             return
             
@@ -52,7 +56,7 @@ class NinetyDegreeRotator(Plugin):
 
         self.log.info(f"Processing rotate command: {evt.event_id}")
         
-        # Check if this is a reply to another message
+        # Ensure this is a reply to another message
         if not hasattr(evt.content, 'relates_to') or not evt.content.relates_to or not hasattr(evt.content.relates_to, 'in_reply_to'):
             await evt.respond("Please reply to an image message with /rotate or /r to rotate it.")
             return
@@ -66,12 +70,12 @@ class NinetyDegreeRotator(Plugin):
             await evt.respond("Could not find the message you're replying to.")
             return
             
-        # Check if the replied message is an image
+        # Ensure the replied message is an image
         if replied_msg.content.msgtype != MessageType.IMAGE:
             await evt.respond("Please reply to an image message to rotate it.")
             return
 
-        self.log.info(f"Processing image from replied message: {reply_to_id}")
+        self.log.info(f"Processing rotate command for: {reply_to_id}")
 
         try:
             image_bytes = None
@@ -80,7 +84,6 @@ class NinetyDegreeRotator(Plugin):
             # Check if it's an encrypted file
             if hasattr(replied_msg.content, "file") and replied_msg.content.file:
                 # Encrypted file
-                self.log.info("Detected encrypted file")
                 enc_info: EncryptedFile = replied_msg.content.file
                 mxc_url = enc_info.url
 
@@ -89,28 +92,16 @@ class NinetyDegreeRotator(Plugin):
                     return
 
                 try:
-                    # Use the client's built-in download method for encrypted files
-                    self.log.info(f"Downloading encrypted media from: {mxc_url}")
+                    # Download and decrypt the encrypted file
                     encrypted_bytes = await evt.client.download_media(mxc_url)
                     
-                    self.log.info(f"Downloaded {len(encrypted_bytes)} bytes of encrypted data")
-                    self.log.info(f"Key: {enc_info.key.key}")
-                    self.log.info(f"Hash: {enc_info.hashes['sha256']}")
-                    self.log.info(f"IV: {enc_info.iv}")
-                    
                     # Decrypt using the metadata from the event
-                    try:
-                        image_bytes = decrypt_attachment(
-                            ciphertext=encrypted_bytes,
-                            key=enc_info.key.key,
-                            hash=enc_info.hashes["sha256"],
-                            iv=enc_info.iv
-                        )
-                        self.log.info(f"Successfully decrypted {len(image_bytes)} bytes")
-                    except Exception as decrypt_error:
-                        self.log.error(f"decrypt_attachment failed: {decrypt_error}")
-                        self.log.error(f"Error type: {type(decrypt_error)}")
-                        raise decrypt_error
+                    image_bytes = decrypt_attachment(
+                        ciphertext=encrypted_bytes,
+                        key=enc_info.key.key,
+                        hash=enc_info.hashes["sha256"],
+                        iv=enc_info.iv
+                    )
 
                 except EncryptionError as e:
                     self.log.error(f"Decryption failed for {filename}: {e}")
@@ -123,7 +114,6 @@ class NinetyDegreeRotator(Plugin):
 
             elif replied_msg.content.url:
                 # Unencrypted file
-                self.log.info("Detected unencrypted file")
                 mxc_url = replied_msg.content.url
                 image_bytes = await evt.client.download_media(mxc_url)
 
@@ -136,7 +126,6 @@ class NinetyDegreeRotator(Plugin):
                 return
 
             # Process the image
-            self.log.info(f"Processing image with {len(image_bytes)} bytes")
             img = Image.open(BytesIO(image_bytes))
             rotated_img = img.rotate(-90, expand=True)  # Rotate 90 degrees counter-clockwise
 
@@ -172,7 +161,7 @@ class NinetyDegreeRotator(Plugin):
                 }
             )
 
-            self.log.info(f"Successfully rotated and sent image: {evt.event_id}")
+            self.log.info(f"Successfully rotated and sent image")
 
         except Exception as e:
             self.log.error(f"Error processing image: {e}", exc_info=True)
