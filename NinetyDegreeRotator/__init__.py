@@ -70,7 +70,7 @@ class NinetyDegreeRotator(Plugin):
                     # Decrypt using the metadata from the event
                     image_bytes = decrypt_attachment(
                         ciphertext=encrypted_bytes,
-                        key=enc_info.key,
+                        key=enc_info.key.key,
                         iv=enc_info.iv,
                         hash=enc_info.hashes["sha256"]
                     )
