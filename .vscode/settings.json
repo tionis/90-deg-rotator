@@ -1,0 +1,38 @@
+{
+    "python.defaultInterpreterPath": "./.venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "python.formatting.provider": "black",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.linting.mypyEnabled": true,
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": ["tests"],
+    "python.testing.unittestEnabled": false,
+    "files.associations": {
+        "*.yaml": "yaml",
+        "*.yml": "yaml",
+        "maubot.yaml": "yaml"
+    },
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/maubot/maubot/master/maubot/plugin.schema.yaml": [
+            "maubot.yaml"
+        ]
+    },
+    "terminal.integrated.env.linux": {
+        "UV_PROJECT_ENVIRONMENT": ".venv"
+    },
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        ".venv": true,
+        "*.mbp": true,
+        "builds/*.mbp": false
+    },
+    "search.exclude": {
+        ".venv": true,
+        "builds": true
+    }
+}

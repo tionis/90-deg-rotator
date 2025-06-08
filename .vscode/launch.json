@@ -1,0 +1,63 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Build & Upload Plugin",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/maubot-dev.py",
+            "args": ["build-upload"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Deploy Plugin (Interactive)",
+            "type": "debugpy", 
+            "request": "launch",
+            "program": "${workspaceFolder}/maubot-dev.py",
+            "args": ["deploy", "-i", "${input:instanceId}"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Check Plugin Status",
+            "type": "debugpy",
+            "request": "launch", 
+            "program": "${workspaceFolder}/maubot-api.py",
+            "args": ["status"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "List Plugins & Instances",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/maubot-api.py", 
+            "args": ["list"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Run Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": ["tests/", "-v"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "instanceId",
+            "description": "Instance ID for deployment",
+            "default": "",
+            "type": "promptString"
+        }
+    ]
+}

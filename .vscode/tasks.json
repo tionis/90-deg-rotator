@@ -1,0 +1,213 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Plugin",
+            "type": "shell",
+            "command": "./maubot-dev.py",
+            "args": ["build"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Build the maubot plugin (.mbp file)"
+        },
+        {
+            "label": "Upload Plugin",
+            "type": "shell",
+            "command": "./maubot-dev.py",
+            "args": ["upload"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Upload the plugin to maubot server"
+        },
+        {
+            "label": "Build & Upload Plugin",
+            "type": "shell",
+            "command": "./maubot-dev.py",
+            "args": ["build-upload"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Build and upload the plugin in one step (recommended)"
+        },
+        {
+            "label": "Deploy Plugin (with Instance ID)",
+            "type": "shell",
+            "command": "./maubot-dev.py",
+            "args": [
+                "deploy",
+                "-i",
+                "${input:instanceId}"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Full deployment: build, upload, and update instance"
+        },
+        {
+            "label": "mbc Login",
+            "type": "shell",
+            "command": ".venv/bin/python",
+            "args": ["-m", "maubot.cli", "login"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Log into maubot instance for deployment"
+        },
+        {
+            "label": "Check Plugin Status",
+            "type": "shell",
+            "command": "./maubot-api.py",
+            "args": ["status"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Check the status of plugins and instances"
+        },
+        {
+            "label": "Project Health Check",
+            "type": "shell",
+            "command": "./maubot-dev.py",
+            "args": ["status"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Run comprehensive project health check (builds, versions, git, server)"
+        },
+        {
+            "label": "List Plugins & Instances",
+            "type": "shell",
+            "command": "./maubot-api.py",
+            "args": ["list"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "List all plugins and instances in detail"
+        },
+        {
+            "label": "Setup Dependencies",
+            "type": "shell",
+            "command": "./maubot-dev.py",
+            "args": ["setup"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Setup project dependencies (maubot, etc.)"
+        },
+        {
+            "label": "Enable Instance",
+            "type": "shell",
+            "command": "./maubot-api.py",
+            "args": [
+                "enable",
+                "${input:instanceId}"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Enable a specific plugin instance"
+        },
+        {
+            "label": "Disable Instance",
+            "type": "shell",
+            "command": "./maubot-api.py",
+            "args": [
+                "disable",
+                "${input:instanceId}"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Disable a specific plugin instance"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "instanceId",
+            "description": "Instance ID",
+            "default": "",
+            "type": "promptString"
+        }
+    ]
+}
