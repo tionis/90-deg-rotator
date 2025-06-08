@@ -1,0 +1,42 @@
+# Configuration for NinetyDegreeRotator plugin
+
+# Whether to automatically join rooms when invited
+autojoin: true
+
+# Available commands that trigger image rotation
+commands:
+  - "!rotate"
+  - "!r"
+
+# Image processing settings
+image:
+  # Rotation angle in degrees (positive = clockwise, negative = counter-clockwise)
+  rotation_angle: -90
+  
+  # Maximum file size to process (in bytes, default 10MB)
+  max_file_size: 10485760
+  
+  # Supported image formats
+  supported_formats:
+    - "PNG"
+    - "JPEG"
+    - "JPG"
+    - "GIF"
+    - "WEBP"
+
+# Response messages
+messages:
+  # Message shown when user doesn't reply to an image
+  reply_to_image: "Please reply to an image message with !rotate or !r to rotate it."
+  
+  # Message shown when replying to non-image content
+  not_an_image: "Please reply to an image message to rotate it."
+  
+  # Message shown when image processing fails
+  processing_error: "Sorry, I couldn't process that image"
+  
+  # Message shown when file is too large
+  file_too_large: "The image file is too large to process."
+  
+  # Message shown when format is not supported
+  unsupported_format: "This image format is not supported."

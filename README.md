@@ -54,5 +54,4 @@ autojoin: true  # Auto-join rooms when invited
 - **Build failures:** Run `./maubot-dev.py status` to check setup
 
 ## License
-
-MIT License
+AGPL-3.0

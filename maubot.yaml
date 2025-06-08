@@ -23,10 +23,12 @@ modules:
 # The main class must extend maubot.Plugin
 main_class: NinetyDegreeRotator/NinetyDegreeRotator
 
-#  Extra files that the upcoming build tool should include in the mbp file.
+# Enable configuration in the web UI
+config: true
 
-#extra_files:
-#- base-config.yaml
+#  Extra files that the upcoming build tool should include in the mbp file.
+extra_files:
+- base-config.yaml
 
 
 # List of dependencies

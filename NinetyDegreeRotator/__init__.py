@@ -13,6 +13,9 @@ from PIL import Image
 class Config(BaseProxyConfig):
     def do_update(self, helper: ConfigUpdateHelper) -> None:
         helper.copy("autojoin")
+        helper.copy("commands")
+        helper.copy("image")
+        helper.copy("messages")
 
 
 class NinetyDegreeRotator(Plugin):
@@ -23,6 +26,7 @@ class NinetyDegreeRotator(Plugin):
 
     async def start(self) -> None:
         await super().start()
+        self.config.load_and_update()
         self.log.info("NinetyDegreeRotator plugin started.")
 
     @event.on(EventType.ROOM_MEMBER)
@@ -43,14 +47,16 @@ class NinetyDegreeRotator(Plugin):
             
         # Check if the message is a rotate command
         body = (evt.content.body or "").strip().lower()
-        if not (body.startswith('!rotate') or body.startswith('!r')):
+        commands = self.config.get("commands", ["!rotate", "!r"])
+        if not any(body.startswith(cmd.lower()) for cmd in commands):
             return
 
         self.log.info(f"Processing rotate command: {evt.event_id}")
         
         # Ensure this is a reply to another message
         if not hasattr(evt.content, 'relates_to') or not evt.content.relates_to or not hasattr(evt.content.relates_to, 'in_reply_to'):
-            await evt.respond("Please reply to an image message with !rotate or !r to rotate it.")
+            reply_msg = self.config.get("messages", {}).get("reply_to_image", "Please reply to an image message with !rotate or !r to rotate it.")
+            await evt.respond(reply_msg)
             return
             
         # Get the message being replied to
@@ -64,7 +70,8 @@ class NinetyDegreeRotator(Plugin):
             
         # Ensure the replied message is an image
         if replied_msg.content.msgtype != MessageType.IMAGE:
-            await evt.respond("Please reply to an image message to rotate it.")
+            not_image_msg = self.config.get("messages", {}).get("not_an_image", "Please reply to an image message to rotate it.")
+            await evt.respond(not_image_msg)
             return
 
         try:
@@ -117,7 +124,8 @@ class NinetyDegreeRotator(Plugin):
 
             # Process the image
             img = Image.open(BytesIO(image_bytes))
-            rotated_img = img.rotate(-90, expand=True)  # Rotate 90 degrees counter-clockwise
+            rotation_angle = self.config.get("image", {}).get("rotation_angle", -90)
+            rotated_img = img.rotate(rotation_angle, expand=True)
 
             # Convert back to bytes
             output_buffer = BytesIO()
@@ -157,3 +165,7 @@ class NinetyDegreeRotator(Plugin):
 
     async def stop(self) -> None:
         pass
+
+    @classmethod
+    def get_config_class(cls) -> Type[BaseProxyConfig]:
+        return Config
