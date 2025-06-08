@@ -20,17 +20,18 @@ A maubot plugin that rotates images 90 degrees counter-clockwise when commanded 
 ./maubot-dev.py build-upload
 ```
 
-**Authentication:** See [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md)
-
 **Usage:** Reply to any image with `!rotate` or `!r`
 
 ## Configuration
 
-Configure your bot instance in the maubot web interface:
+Configure your bot instance through the maubot web interface. The plugin supports comprehensive configuration options including:
 
-```yaml
-autojoin: true  # Auto-join rooms when invited
-```
+- Custom rotation commands and angles
+- Image processing limits and supported formats  
+- Customizable response messages
+- Auto-join room behavior
+
+For all available configuration options and their default values, see [`base-config.yaml`](base-config.yaml).
 
 ## Management
 
