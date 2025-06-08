@@ -1,5 +1,5 @@
 # The unique ID for the plugin. Java package naming style. (i.e. use your own domain, not xyz.maubot)
-id: dev.tionis.maubot.NinetyDegreeRotator
+id: dev.tionis.maubot.ImageRotator
 
 # A PEP 440 compliant version string.
 version: 0.2.0
@@ -15,13 +15,13 @@ license: AGPL-3.0-or-later
 # Submodules that are imported by modules listed here don't need to be listed separately.
 # However, top-level modules must always be listed even if they're imported by other modules.
 modules:
-- NinetyDegreeRotator
+- ImageRotator
 
 # The main class of the plugin. Format: module/Class
 # If `module` is omitted, will default to last module specified in the module list.
 # Even if `module` is not omitted here, it must be included in the modules list.
 # The main class must extend maubot.Plugin
-main_class: NinetyDegreeRotator/NinetyDegreeRotator
+main_class: ImageRotator/ImageRotator
 
 # Enable configuration in the web UI
 config: true

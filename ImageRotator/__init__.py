@@ -6,8 +6,15 @@ from maubot.handlers import event
 from mautrix.types import EncryptedFile, EventType, MessageType, RelatesTo
 from mautrix.util.config import BaseProxyConfig, ConfigUpdateHelper
 from mautrix.crypto.attachments import decrypt_attachment
-from mautrix.errors import DecryptionError
 from PIL import Image
+
+# Handle different versions of mautrix crypto
+try:
+    from mautrix.crypto.attachments import EncryptionError
+except ImportError:
+    # Fallback for older versions that don't export EncryptionError
+    class EncryptionError(Exception):
+        pass
 
 
 class Config(BaseProxyConfig):
@@ -18,16 +25,17 @@ class Config(BaseProxyConfig):
         helper.copy("messages")
 
 
-class NinetyDegreeRotator(Plugin):
+class ImageRotator(Plugin):
     """
     A Matrix bot that rotates images by 90 degrees when commanded.
-    Usage: Reply to an image with !rotate or !r to rotate it.
+    Usage: Reply to an image with /rotate or /r to rotate it.
     """
+    PLUGIN_VERSION = "v0.2.0"
 
     async def start(self) -> None:
         await super().start()
         self.config.load_and_update()
-        self.log.info("NinetyDegreeRotator plugin started.")
+        self.log.info(f"ImageRotator plugin {self.PLUGIN_VERSION} started.")
 
     @event.on(EventType.ROOM_MEMBER)
     async def on_invite(self, evt: MessageEvent) -> None:
@@ -47,16 +55,14 @@ class NinetyDegreeRotator(Plugin):
             
         # Check if the message is a rotate command
         body = (evt.content.body or "").strip().lower()
-        commands = self.config.get("commands", ["!rotate", "!r"])
-        if not any(body.startswith(cmd.lower()) for cmd in commands):
+        if not (body.startswith('/rotate') or body.startswith('/r')):
             return
 
         self.log.info(f"Processing rotate command: {evt.event_id}")
         
         # Ensure this is a reply to another message
         if not hasattr(evt.content, 'relates_to') or not evt.content.relates_to or not hasattr(evt.content.relates_to, 'in_reply_to'):
-            reply_msg = self.config.get("messages", {}).get("reply_to_image", "Please reply to an image message with !rotate or !r to rotate it.")
-            await evt.respond(reply_msg)
+            await evt.respond("Please reply to an image message with /rotate or /r to rotate it.")
             return
             
         # Get the message being replied to
@@ -70,9 +76,10 @@ class NinetyDegreeRotator(Plugin):
             
         # Ensure the replied message is an image
         if replied_msg.content.msgtype != MessageType.IMAGE:
-            not_image_msg = self.config.get("messages", {}).get("not_an_image", "Please reply to an image message to rotate it.")
-            await evt.respond(not_image_msg)
+            await evt.respond("Please reply to an image message to rotate it.")
             return
+
+        self.log.info(f"Processing rotate command for: {reply_to_id}")
 
         try:
             image_bytes = None
@@ -100,7 +107,7 @@ class NinetyDegreeRotator(Plugin):
                         iv=enc_info.iv
                     )
 
-                except DecryptionError as e:
+                except EncryptionError as e:
                     self.log.error(f"Decryption failed for {filename}: {e}")
                     await evt.respond(f"Could not decrypt the encrypted image: {str(e)}")
                     return
@@ -124,8 +131,7 @@ class NinetyDegreeRotator(Plugin):
 
             # Process the image
             img = Image.open(BytesIO(image_bytes))
-            rotation_angle = self.config.get("image", {}).get("rotation_angle", -90)
-            rotated_img = img.rotate(rotation_angle, expand=True)
+            rotated_img = img.rotate(-90, expand=True)  # Rotate 90 degrees counter-clockwise
 
             # Convert back to bytes
             output_buffer = BytesIO()
@@ -158,6 +164,8 @@ class NinetyDegreeRotator(Plugin):
                     },
                 }
             )
+
+            self.log.info(f"Successfully rotated and sent image")
 
         except Exception as e:
             self.log.error(f"Error processing image: {e}", exc_info=True)

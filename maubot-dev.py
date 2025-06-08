@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Deployment script for NinetyDegreeRotator maubot plugin
+Deployment script for ImageRotator maubot plugin
 
 This script automates the build, upload, and deployment process.
 Uses UV for dependency management when available.
@@ -440,7 +440,7 @@ def run_status_check():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Deploy NinetyDegreeRotator maubot plugin")
+    parser = argparse.ArgumentParser(description="Deploy ImageRotator maubot plugin")
     parser.add_argument(
         "action", 
         choices=["setup", "build", "upload", "build-upload", "deploy", "status"], 

@@ -1,4 +1,4 @@
-# VS Code Configuration for NinetyDegreeRotator
+# VS Code Configuration for ImageRotator
 
 This directory contains VS Code-specific configuration files to streamline development and deployment of the maubot plugin.
 

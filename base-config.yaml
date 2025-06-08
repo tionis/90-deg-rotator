@@ -1,4 +1,4 @@
-# Configuration for NinetyDegreeRotator plugin
+# Configuration for ImageRotator plugin
 
 # Whether to automatically join rooms when invited
 autojoin: true

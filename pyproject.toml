@@ -51,10 +51,10 @@ Issues = "https://github.com/tionis/ninety-degree-rotator/issues"
 Documentation = "https://github.com/tionis/ninety-degree-rotator/blob/main/README.md"
 
 [tool.hatch.build.targets.wheel]
-packages = ["NinetyDegreeRotator"]
+packages = ["ImageRotator"]
 
 [tool.hatch.version]
-path = "NinetyDegreeRotator/__init__.py"
+path = "ImageRotator/__init__.py"
 
 [tool.black]
 line-length = 100

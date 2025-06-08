@@ -1,4 +1,4 @@
-# NinetyDegreeRotator - Matrix Bot Plugin
+# ImageRotator - Matrix Bot Plugin
 
 **Type**: Python maubot plugin that rotates images 90° counter-clockwise when commanded
 
@@ -8,7 +8,7 @@
 - **Auto-join**: Automatically joins rooms when invited (configurable)
 
 ## Key Files
-- `NinetyDegreeRotator/__init__.py` - Main plugin code
+- `ImageRotator/__init__.py` - Main plugin code
 - `maubot.yaml` - Plugin metadata
 - `maubot-dev.py` - Build/deploy automation
 - `maubot-api.py` - Instance management
@@ -23,7 +23,7 @@
 
 # Instance management
 ./maubot-api.py status
-./maubot-api.py update <instance-id> dev.tionis.maubot.NinetyDegreeRotator
+./maubot-api.py update <instance-id> dev.tionis.maubot.ImageRotator
 ```
 
 ## Architecture
