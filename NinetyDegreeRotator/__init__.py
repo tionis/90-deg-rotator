@@ -6,15 +6,8 @@ from maubot.handlers import event
 from mautrix.types import EncryptedFile, EventType, MessageType, RelatesTo
 from mautrix.util.config import BaseProxyConfig, ConfigUpdateHelper
 from mautrix.crypto.attachments import decrypt_attachment
+from mautrix.errors import DecryptionError
 from PIL import Image
-
-# Handle different versions of mautrix crypto
-try:
-    from mautrix.crypto.attachments import EncryptionError
-except ImportError:
-    # Fallback for older versions that don't export EncryptionError
-    class EncryptionError(Exception):
-        pass
 
 
 class Config(BaseProxyConfig):
@@ -25,13 +18,12 @@ class Config(BaseProxyConfig):
 class NinetyDegreeRotator(Plugin):
     """
     A Matrix bot that rotates images by 90 degrees when commanded.
-    Usage: Reply to an image with /rotate or /r to rotate it.
+    Usage: Reply to an image with !rotate or !r to rotate it.
     """
-    PLUGIN_VERSION = "v0.2.0"
 
     async def start(self) -> None:
         await super().start()
-        self.log.info(f"NinetyDegreeRotator plugin {self.PLUGIN_VERSION} started.")
+        self.log.info("NinetyDegreeRotator plugin started.")
 
     @event.on(EventType.ROOM_MEMBER)
     async def on_invite(self, evt: MessageEvent) -> None:
@@ -51,14 +43,14 @@ class NinetyDegreeRotator(Plugin):
             
         # Check if the message is a rotate command
         body = (evt.content.body or "").strip().lower()
-        if not (body.startswith('/rotate') or body.startswith('/r')):
+        if not (body.startswith('!rotate') or body.startswith('!r')):
             return
 
         self.log.info(f"Processing rotate command: {evt.event_id}")
         
         # Ensure this is a reply to another message
         if not hasattr(evt.content, 'relates_to') or not evt.content.relates_to or not hasattr(evt.content.relates_to, 'in_reply_to'):
-            await evt.respond("Please reply to an image message with /rotate or /r to rotate it.")
+            await evt.respond("Please reply to an image message with !rotate or !r to rotate it.")
             return
             
         # Get the message being replied to
@@ -74,8 +66,6 @@ class NinetyDegreeRotator(Plugin):
         if replied_msg.content.msgtype != MessageType.IMAGE:
             await evt.respond("Please reply to an image message to rotate it.")
             return
-
-        self.log.info(f"Processing rotate command for: {reply_to_id}")
 
         try:
             image_bytes = None
@@ -103,7 +93,7 @@ class NinetyDegreeRotator(Plugin):
                         iv=enc_info.iv
                     )
 
-                except EncryptionError as e:
+                except DecryptionError as e:
                     self.log.error(f"Decryption failed for {filename}: {e}")
                     await evt.respond(f"Could not decrypt the encrypted image: {str(e)}")
                     return
@@ -161,15 +151,9 @@ class NinetyDegreeRotator(Plugin):
                 }
             )
 
-            self.log.info(f"Successfully rotated and sent image")
-
         except Exception as e:
             self.log.error(f"Error processing image: {e}", exc_info=True)
             await evt.respond(f"Sorry, I couldn't process that image: {str(e)}")
 
     async def stop(self) -> None:
         pass
-
-    @classmethod
-    def get_config_class(cls) -> Type[BaseProxyConfig]:
-        return Config

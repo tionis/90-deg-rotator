@@ -1,11 +1,11 @@
 # NinetyDegreeRotator Maubot Plugin
 
-A maubot plugin that rotates images 90 degrees counter-clockwise when commanded in Matrix rooms. Responds to `/rotate` or `/r` commands sent as replies to image messages.
+A maubot plugin that rotates images 90 degrees counter-clockwise when commanded in Matrix rooms. Responds to `!rotate` or `!r` commands sent as replies to image messages.
 
 ## Features
 
 - 🔄 Rotates images 90 degrees counter-clockwise 
-- 💬 Command: `/rotate` or `/r` as reply to images
+- 💬 Command: `!rotate` or `!r` as reply to images
 - 🔐 Supports encrypted and unencrypted images
 - 🤖 Auto-joins rooms when invited
 
@@ -22,7 +22,7 @@ A maubot plugin that rotates images 90 degrees counter-clockwise when commanded 
 
 **Authentication:** See [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md)
 
-**Usage:** Reply to any image with `/rotate` or `/r`
+**Usage:** Reply to any image with `!rotate` or `!r`
 
 ## Configuration
 

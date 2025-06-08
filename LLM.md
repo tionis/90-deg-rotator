@@ -3,7 +3,7 @@
 **Type**: Python maubot plugin that rotates images 90° counter-clockwise when commanded
 
 ## Current Functionality
-- **Command-based**: Only responds to `/rotate` or `/r` commands sent as replies to image messages
+- **Command-based**: Only responds to `!rotate` or `!r` commands sent as replies to image messages
 - **Encryption support**: Handles both encrypted and unencrypted Matrix images
 - **Auto-join**: Automatically joins rooms when invited (configurable)
 
@@ -27,14 +27,14 @@
 ```
 
 ## Architecture
-- Event handler for text messages looking for `/rotate` or `/r` commands
+- Event handler for text messages looking for `!rotate` or `!r` commands
 - Validates command is a reply to an image message
 - Downloads → Decrypts (if needed) → Rotates → Uploads → Responds
 - Uses mautrix built-in decryption with manual fallback
 
 ## Implementation Notes
 - Prevents self-processing: `if evt.sender == self.client.mxid: return`
-- Command detection: `body.startswith('/rotate') or body.startswith('/r')`
+- Command detection: `body.startswith('!rotate') or body.startswith('!r')`
 - Reply validation: Checks `evt.content.relates_to.in_reply_to.event_id`
 - Encryption detection: `isinstance(evt.content, EncryptedMessageEventContent)`
 - Image rotation: Pillow with 90° counter-clockwise transform

@@ -285,19 +285,6 @@ def check_plugin_version():
         print(f"❌ Could not read plugin version: {e}")
         return False
 
-    # Check code version
-    try:
-        with open("NinetyDegreeRotator/__init__.py", "r") as f:
-            content = f.read()
-            for line in content.split("\n"):
-                if "PLUGIN_VERSION" in line and "=" in line:
-                    code_version = line.split("=")[-1].strip().strip("\"'")
-                    print(f"✅ Code Version: {code_version}")
-                    break
-    except Exception as e:
-        print(f"❌ Could not read code version: {e}")
-        return False
-
     return True
 
 
