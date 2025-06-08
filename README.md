@@ -17,7 +17,7 @@ A maubot plugin that rotates images 90 degrees counter-clockwise when commanded 
 .venv/bin/python -m maubot.cli login
 
 # Build and deploy
-./maubot-dev.py deploy -i your-instance-id
+./maubot-dev.py build-upload
 ```
 
 **Authentication:** See [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md)
